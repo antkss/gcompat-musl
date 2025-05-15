@@ -33,8 +33,9 @@ build() {
 		cp -r $bdir/libgcompat $bdir/musl-$pkgver/src
 	fi 
 	cd $bdir/musl-$pkgver
+	grep -rl "__attribute__((__visibility__(\"hidden\")))" | xargs sed -i -e 's/__attribute__((__visibility__("hidden")))//g'
 	mkdir build; cd build
-	export CFLAGS="-static-pie -static -g"
+	export CFLAGS="-static-pie -static -g -Wl,--gc-sections"
 	../configure --prefix=$pkgdir
 	make -j$(nproc)
 }

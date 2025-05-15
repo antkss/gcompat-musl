@@ -18,8 +18,6 @@
 #include "defs.h"
 #include "libucontext.h"
 
-__attribute__ ((visibility ("hidden")))
-// __attribute__ ((optimize ("omit-frame-pointer")))
 void
 libucontext_trampoline(void)
 {
