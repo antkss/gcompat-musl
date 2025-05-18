@@ -29,8 +29,8 @@ prepare() {
 
 build() {
 	cd $bdir
-	if [ ! -d $bdir/musl-$pkgver/src/libgcompat ]; then
-		cp -r $bdir/libgcompat $bdir/musl-$pkgver/src
+	if [ ! -f $bdir/musl-$pkgver/src/libgcompat ]; then
+		ln -sr $bdir/libgcompat $bdir/musl-$pkgver/src
 	fi 
 	cd $bdir/musl-$pkgver
 	# clean visibility 
