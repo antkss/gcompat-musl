@@ -102,7 +102,9 @@ void __explicit_bzero_chk(void *s, size_t n, size_t buflen)
  */
 void *__rawmemchr(const void *s, int c)
 {
-	return memchr(s, c, strlen(s));
+  if ((unsigned char) c != '\0')
+    return memchr (s, c, (size_t)-1);
+  return (char *)s + strlen (s);
 }
 weak_alias(__rawmemchr, rawmemchr);
 

@@ -33,7 +33,11 @@ build() {
 		cp -r $bdir/libgcompat $bdir/musl-$pkgver/src
 	fi 
 	cd $bdir/musl-$pkgver
-	grep -rl "__attribute__((__visibility__(\"hidden\")))" | xargs sed -i -e 's/__attribute__((__visibility__("hidden")))//g'
+	# clean visibility 
+	attribute=($(grep -rh --include='*.c' --include='*.h' "visibility" | grep hidden | grep attribute | grep define -v))
+	for i in ${attribute[@]}; do
+		grep -rl $i | xargs sed -i -e 's/__attribute__((__visibility__("hidden")))//g'
+	done
 	mkdir build; cd build
 	export CFLAGS="-static-pie -static -g -Wl,--gc-sections"
 	../configure --prefix=$pkgdir
@@ -43,8 +47,14 @@ build() {
 package() {
 	build_dir=$bdir/musl-$pkgver/build
 	cd $build_dir
-	../tools/install.sh -D lib/libc.so $pkgdir/usr/lib/ld-linux-x86-64.so.2
-	../tools/install.sh -D -l ../lib/ld-linux-x86-64.so.2 $pkgdir/usr/lib64/ld-linux-x86-64.so.2
-	../tools/install.sh -D -l ../usr/lib/ld-linux-x86-64.so.2 $pkgdir/lib64/ld-linux-x86-64.so.2
-	../tools/install.sh -D -l ../usr/lib/ld-linux-x86-64.so.2 $pkgdir/lib/ld-linux-x86-64.so.2
+	../tools/install.sh -D lib/libc.so $pkgdir/usr/lib/libgcompat.so
+	../tools/install.sh -D -l libgcompat.so $pkgdir/usr/lib/ld-linux-x86-64.so.2
+
+	../tools/install.sh -D -l ../lib/libgcompat.so $pkgdir/usr/lib64/ld-linux-x86-64.so.2
+	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib64/ld-linux-x86-64.so.2
+	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib/ld-linux-x86-64.so.2
+
+	../tools/install.sh -D -l ../lib/libgcompat.so $pkgdir/usr/lib64/libgcompat.so
+	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib64/libgcompat.so
+	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib/libgcompat.so
 }
