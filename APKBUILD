@@ -7,7 +7,7 @@ arch=noarch
 license="BSD"
 # depends="libwnck3-dev gobject-introspection-dev meson ninja pkgconf gtk+3.0-dev gtk-layer-shell-dev json-c-dev "
 url="google.com"
-export bdir=$srcdir/..
+export bdir=$(pwd)
 
 # export pack=( $(find "$bdir" -type d -maxdepth 1 -not -name ".") )
 # echo $pack
@@ -29,7 +29,7 @@ prepare() {
 
 build() {
 	cd $bdir
-	if [ ! -f $bdir/musl-$pkgver/src/libgcompat ]; then
+	if [ ! -d $bdir/musl-$pkgver/src/libgcompat ]; then
 		ln -sr $bdir/libgcompat $bdir/musl-$pkgver/src
 	fi 
 	cd $bdir/musl-$pkgver
@@ -41,7 +41,8 @@ build() {
 	mkdir build; cd build
 	export CFLAGS="-static-pie -static -g -Wl,--gc-sections"
 	../configure --prefix=$pkgdir
-	make -j$(nproc)
+	make CFLAGS="-I$bdir/musl-$pkgver/src/malloc/mallocng" -j$(nproc)
+
 }
 
 package() {
@@ -57,4 +58,5 @@ package() {
 	../tools/install.sh -D -l ../lib/libgcompat.so $pkgdir/usr/lib64/libgcompat.so
 	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib64/libgcompat.so
 	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib/libgcompat.so
+	../tools/install.sh -D -l ../usr/lib/libgcompat.so $pkgdir/lib/libc.so.6
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>  /* malloc, free */
 
 #include "internal.h"
+#include "alias.h"
 
 struct dtor_node {
 	struct dtor_node *next;
@@ -23,6 +24,7 @@ static void run_dtors(void *head)
 		node = next;
 	}
 }
+alias(run_dtors, __call_tls_dtors);
 
 static void create_key(void)
 {

@@ -1,4 +1,4 @@
-#include "features.h"
+#include <features.h>
 #define _GNU_SOURCE
 #include <ctype.h>
 #include <inttypes.h>
@@ -18,6 +18,11 @@
 #include <stdio.h>
 #include <sys/mman.h>
 #include <stdarg.h>
+#include <sys/syscall.h>
+#include <fcntl.h>
+#include <sys/epoll.h>
+#include <signal.h>
+#define EBADF 9
 size_t __mbstowcs_chk(wchar_t *dst, const char *src, size_t len, size_t dstlen) {
     size_t result;
 
@@ -258,4 +263,56 @@ long __isoc23_wcstol(const wchar_t *nptr, wchar_t **endptr, int base) {
 unsigned long long __isoc23_strtoull(const char *nptr, char **endptr, int base) {
     return strtoull(nptr, endptr, base);
 }
+int close_range(unsigned int fd_start, unsigned int fd_end, int flags) {
+    int ret = 0;
+    for (unsigned int fd = fd_start; fd <= fd_end; ++fd) {
+        if (close(fd) == -1 && errno != EBADF)
+            ret = -1;  // Record at least one failure
+    }
+    return ret;
+}
+int renameat2(int olddirfd, const char *oldpath,
+              int newdirfd, const char *newpath,
+              unsigned int flags)
+{
+    return syscall(SYS_renameat2, olddirfd, oldpath, newdirfd, newpath, flags);
+}
+int __openat64_2(int dirfd, const char *pathname, int flags, ...) {
+    va_list ap;
+    mode_t mode = 0;
+    int fd;
+
+    va_start(ap, flags);
+    // If O_CREAT or O_TMPFILE is set, mode_t argument must be passed
+    if ((flags & O_CREAT) || (flags & O_TMPFILE)) {
+        mode = va_arg(ap, mode_t);
+        fd = syscall(SYS_openat, dirfd, pathname, flags, mode);
+    } else {
+        fd = syscall(SYS_openat, dirfd, pathname, flags);
+    }
+    va_end(ap);
+
+    return fd;
+}
+ssize_t __readlinkat_chk(int dirfd, const char *pathname, char *buf, size_t bufsiz, size_t bufsize_real) {
+    if (bufsiz > bufsize_real) {
+        // buffer overflow risk, abort or error
+        __builtin_trap();
+    }
+    return readlinkat(dirfd, pathname, buf, bufsiz);
+}
+int pidfd_open(pid_t pid, unsigned int flags) {
+    return syscall(SYS_pidfd_open, pid, flags);
+}
+int pidfd_send_signal(int pidfd, int sig, siginfo_t *info, unsigned int flags) {
+    return syscall(SYS_pidfd_send_signal, pidfd, sig, info, flags);
+}
+int epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
+                 const struct timespec *timeout, const sigset_t *sigmask) {
+    return syscall(SYS_epoll_pwait2, epfd, events, maxevents, timeout, sigmask);
+}
+
+
+
+
 
