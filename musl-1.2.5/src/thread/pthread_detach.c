@@ -8,20 +8,14 @@ int is_mapped(void *addr) {
         perror("sysconf_SC_PAGESIZE");
         return -1;
     }
-
     void *page_aligned_addr = (void *)((uintptr_t)addr & ~(page_size - 1));
-
     unsigned char vec[1]; 
-
-    if (mincore(page_aligned_addr, page_size, vec) == 0) {
-        return 1; 
-    } else {
-		return 0;
-    }
+    return mincore(page_aligned_addr, page_size, vec);
 }
+
 static int __pthread_detach(pthread_t t)
 {
-	if (!is_mapped(t)) return 0;
+	if (is_mapped(t) != 0) return 0;
 	/* If the cas fails, detach state is either already-detached
 	 * or exiting/exited, and pthread_join will trap or cleanup. */
 	if (a_cas(&t->detach_state, DT_JOINABLE, DT_DETACHED) != DT_JOINABLE) {
