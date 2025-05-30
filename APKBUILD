@@ -1,12 +1,13 @@
 #!/bin/bash
 pkgname=gcompat-musl
 pkgver=1.2.5
-pkgrel=1
+pkgrel=0
 pkgdesc="A dynamic tiling Wayland compositor based on wlroots that doesn't sacrifice on its looks."
 arch=noarch
 license="BSD"
 # depends="libwnck3-dev gobject-introspection-dev meson ninja pkgconf gtk+3.0-dev gtk-layer-shell-dev json-c-dev "
 url="google.com"
+options="!check"
 export bdir=$(pwd)
 
 # export pack=( $(find "$bdir" -type d -maxdepth 1 -not -name ".") )
@@ -39,9 +40,8 @@ build() {
 		grep -rl $i | xargs sed -i -e 's/__attribute__((__visibility__("hidden")))//g'
 	done
 	mkdir build; cd build
-	export CFLAGS="-static-pie -static -g -Wl,--gc-sections"
 	../configure --prefix=$pkgdir
-	make CFLAGS="-I$bdir/musl-$pkgver/src/malloc/mallocng" -j$(nproc)
+	make CFLAGS="-I$bdir/musl-$pkgver/src/malloc/mallocng -static-pie -static -g -Wl,--gc-sections" -j$(nproc)
 
 }
 
