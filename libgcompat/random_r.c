@@ -32,6 +32,8 @@
 #include <stdint.h>	/* int32_t, uint32_t */
 #include <errno.h>	/* errno */
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
 
 /* This code uses the same lagged fibonacci generator as the
  * original bsd random implementation except for the seeding
@@ -158,20 +160,57 @@ end:
 	*result = k;
 	return 0;
 }
-uint32_t my_arc4random(void) {
-    // Combine multiple calls to rand() to get a larger random value
-    return ((uint32_t)rand() << 16) | rand();
+int srand_called = 0;
+void arc4random_buf(void *_buf, size_t nbytes) {
+    unsigned char *buf = (unsigned char *)_buf;
+    size_t i;
+
+    // Seed rand() if it hasn't been seeded yet.
+    // This is a basic seeding approach and may not be sufficient for all uses.
+    // For truly unpredictable sequences even with rand(), seeding should be
+    // done carefully, possibly with higher entropy sources if available
+    // (though if those are available, getentropy() would be better).
+    if (!srand_called) {
+        srand((unsigned int)time(NULL)); // Seed with current time
+        srand_called = 1;
+    }
+
+    // Fill the buffer with bytes from rand()
+    for (i = 0; i < nbytes; i++) {
+        // rand() typically returns a value between 0 and RAND_MAX.
+        // RAND_MAX is at least 32767.
+        // We can take bytes from the random number.
+        // To make it slightly better than just taking the lowest byte,
+        // we can call rand() multiple times if needed, though the quality
+        // is still limited by rand() itself.
+        if (i % sizeof(int) == 0) {
+            // Get a new random integer every sizeof(int) bytes or when starting
+            // This is a naive way to try and use more bits from rand()
+            // but the fundamental weaknesses of rand() remain.
+            int random_value = rand();
+            for (size_t j = 0; j < sizeof(int) && (i + j) < nbytes; ++j) {
+                buf[i + j] = ((unsigned char *)&random_value)[j];
+            }
+            i += (sizeof(int) - 1); // Advance i, outer loop will increment once more
+        } else {
+            // This case should ideally not be hit if the above logic is correct,
+            // but as a fallback, fill with a single byte from rand().
+            buf[i] = (unsigned char)(rand() & 0xFF);
+        }
+    }
 }
 
-uint32_t arc4random(uint32_t upper_bound) {
-    if (upper_bound < 2) return 0;
-
-    uint32_t r, threshold = -upper_bound % upper_bound;
-    do {
-        r = my_arc4random();
-    } while (r < threshold);
-
-    return r % upper_bound;
+/*
+ * WARNING: This implementation of arc4random uses the rand()-based arc4random_buf
+ * and is NOT CRYPTOGRAPHICALLY SECURE.
+ */
+uint32_t arc4random(void) {
+    uint32_t val;
+    // Ensure srand has been called by arc4random_buf if not already
+    if (!srand_called) {
+        arc4random_buf(&val, sizeof(val)); // This will call srand
+    } else {
+        arc4random_buf(&val, sizeof(val));
+    }
+    return val;
 }
-
-
