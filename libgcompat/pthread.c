@@ -20,27 +20,6 @@ int __register_atfork(void (*prepare)(void), void (*parent)(void),
 weak_alias(__register_atfork, register_atfork);
 
 /**
- * Get the name of a thread.
- */
-// int pthread_getname_np(pthread_t thread, char *name, size_t len)
-// {
-// 	int fd = open("/proc/thread-self/comm", O_RDONLY | O_CLOEXEC);
-// 	ssize_t n;
-//
-// 	if (fd < 0)
-// 		return errno;
-// 	n = read(fd, name, len);
-// 	if (n < 0)
-// 		return errno;
-// 	/* If the trailing newline was not read, the buffer was too small. */
-// 	if (n == 0 || name[n - 1] != '\n')
-// 		return ERANGE;
-// 	name[n - 1] = '\0';
-//
-// 	return 0;
-// }
-
-/**
  * Yield this thread.
  */
 int pthread_yield(void)
@@ -64,24 +43,7 @@ void __sched_cpufree(cpu_set_t *__set)
 	return CPU_FREE(__set);
 }
 
-/**
- * Gets the mutex kind (non-portable variant).
- */
-int pthread_mutexattr_getkind_np(const pthread_mutexattr_t *attr, int *kind)
-{
-	return pthread_mutexattr_gettype(attr, kind);
-}
 
-/**
- * Sets the mutex kind (non-portable variant).
- */
-int pthread_mutexattr_setkind_np(pthread_mutexattr_t *attr, int kind)
-{
-	if (kind > PTHREAD_MUTEX_ERRORCHECK || kind < PTHREAD_MUTEX_NORMAL)
-		return EINVAL;
-
-	return pthread_mutexattr_settype(attr, kind);
-}
 static inline void normalize_timespec(struct timespec *ts) {
     while (ts->tv_nsec >= 1000000000L) {
         ts->tv_nsec -= 1000000000L;

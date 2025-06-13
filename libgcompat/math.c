@@ -17,61 +17,6 @@ long double scalbl(long double x, long double y)
 	return scalblnl(x, (long int) y);
 }
 
-/*
- * The below require support for ynl/jnl which doesn't exist in musl and isn't
- * implemented in gcompat yet
- */
-#if 0
-/**
- * Return Bessel functions of x of the first kind of order n.
- */
-long double jnl(int n, long double x)
-{
-	/* TODO implement */
-	return 0;
-}
-
-/**
- * Return Bessel functions of x of the first kind of order 0.
- */
-long double j0l(long double n)
-{
-	return jnl(0, n);
-}
-
-/**
- * Return Bessel functions of x of the first kind of order 1.
- */
-long double j1l(long double n)
-{
-	return jnl(1, n);
-}
-
-/**
- * Return Bessel functions of x of the second kind of order n.
- */
-long double ynl(int n, long double x)
-{
-	/* TODO implement */
-	return 0;
-}
-
-/**
- * Return Bessel functions of x of the second kind of order 0.
- */
-long double y0l(long double n)
-{
-	return ynl(0, n);
-}
-
-/**
- * Return Bessel functions of x of the second kind of order 1.
- */
-long double y1l(long double n)
-{
-	return ynl(1, n);
-}
-#endif
 
 /**
  * Test for finite value.

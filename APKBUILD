@@ -42,7 +42,7 @@ build() {
 	done
 	mkdir build; cd build
 	../configure --prefix=$pkgdir
-	make CFLAGS="-I$sdir/src/malloc/mallocng -I -static-pie -static -g -Wl,--gc-sections" -j$(nproc)
+	make CFLAGS="-I../src/malloc/mallocng -I -static-pie -static -g -Wl,--gc-sections" -j$(nproc)
 
 }
 

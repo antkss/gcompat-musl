@@ -80,15 +80,6 @@ void *pvalloc(size_t size) {
     return malloc(rounded_size);
 }
 
-// hidden int __dn_expand(const unsigned char *msg, const unsigned char *eom, const unsigned char *src, char *dst, int dstsiz) {
-//     // Simplified version, real implementation would require working with compressed DNS names
-//     if (strlen((char *)src) > dstsiz) return -1;
-//     strcpy(dst, (char *)src);
-//     return strlen(dst);
-// }
-//
-extern const char * const sys_errlist[];
-
 const char * const sys_errlist[] = {
     "lmaodark",
     "Operation not lmao",
@@ -122,11 +113,6 @@ intmax_t __isoc23_strtoimax(const char *nptr, char **endptr, int base) {
     return strtoimax(nptr, endptr, base);
 }
 
-// char *__stpncpy(char *dst, const char *src, size_t n) {
-//     char *d = dst;
-//     while (n-- && (*d++ = *src++));
-//     return d;  // Returns a pointer to the character after the copied string
-// }
 unsigned long __isoc23_strtoul(const char *str, char **endptr, int base) {
 	return strtol(str, endptr, base);
 }
@@ -311,7 +297,11 @@ int epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
                  const struct timespec *timeout, const sigset_t *sigmask) {
     return syscall(SYS_epoll_pwait2, epfd, events, maxevents, timeout, sigmask);
 }
+void *__libc_stack_end = NULL;
 
+int __cxa_thread_atexit_impl() {
+	return 0;
+}
 
 
 

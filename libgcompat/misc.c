@@ -32,6 +32,4 @@ unsigned int gnu_dev_minor(dev_t dev)
 	return minor(dev);
 }
 
-void *__libc_stack_end = NULL;
-
-char __libc_single_threaded = 0;
+char __libc_single_threaded = 1;

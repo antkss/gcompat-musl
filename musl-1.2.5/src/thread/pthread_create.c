@@ -234,6 +234,7 @@ static void init_file_lock(FILE *f)
 	if (f && f->lock<0) f->lock = 0;
 }
 
+extern char __libc_single_threaded;
 int __pthread_create(pthread_t *restrict res, const pthread_attr_t *restrict attrp, void *(*entry)(void *), void *restrict arg)
 {
 	int ret, c11 = (attrp == __ATTRP_C11_THREAD);

@@ -34,11 +34,5 @@ int dladdr1(const void *addr, Dl_info *info, void **extra_info, int flags)
 		        flags);
 	}
 
-	switch (flags) {
-	case 1 /* RTLD_DL_SYMEMT */:
-	case 2 /* RTLD_DL_LINKMAP */:
-		return 0;
-	default:
-		return dladdr(addr, info);
-	}
+	return dladdr(addr, info);
 }
